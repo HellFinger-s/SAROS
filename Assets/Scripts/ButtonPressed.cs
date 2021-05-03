@@ -32,18 +32,14 @@ public class ButtonPressed : MonoBehaviour
             string OutputPath = EndDirectories[Number].text;
             TextFromFile = CommentChangerAndReader(InputPath, FromLanguage, OutputLanguage, SuccessText);//checked
             TextFromFile = ChangeEOL(TextFromFile, FromLanguage, OutputLanguage);
-            VariableNames = FinderObject.MainFind(TextFromFile, FromLanguage);
-            Debug.Log(VariableNames[0]);
-            Debug.Log(VariableNames[1]);
-            TextFromFile = SpecialSymbolsChanger(VariableNames, TextFromFile, FromLanguage, OutputLanguage);
+            VariableNames = FinderObject.MainFind(TextFromFile, FromLanguage);//ищем имена переменных | find variable names
+            TextFromFile = SpecialSymbolsChanger(VariableNames, TextFromFile, FromLanguage, OutputLanguage);//checked
             WriteToFile(TextFromFile, OutputPath);//checked
             SuccessText.gameObject.SetActive(true);
             SuccessText.text = "Готово " + (Number+1).ToString() + "/" + StartDirectories.Count.ToString();
 
         }
-
-
-       StartCoroutine(Co_WaitForSeconds(2));
+        StartCoroutine(Co_WaitForSeconds(2));
     }
 
 
@@ -60,7 +56,7 @@ public class ButtonPressed : MonoBehaviour
         string buffer = "";
         Dictionary<string, string> SpecialSymbol = new Dictionary<string, string>
         { };
-        foreach (string line in File.ReadAllLines(@"SpecialSymbols.txt"))
+        foreach (string line in File.ReadAllLines(@"SpecialSymbols.txt"))// заполняем словарь специальных символов | filling in the dictionary of special characters
         {
             SpecialSymbol.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
@@ -73,24 +69,16 @@ public class ButtonPressed : MonoBehaviour
                     buffer = TextFromFile[NumberOfLine];
                     try
                     {
-                        if (IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") != -1 
-                            /*&& (IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") + VarNames[VarNameNumber].Length == TextFromFile[NumberOfLine].Length 
-                            || !(char.IsLetter(TextFromFile[NumberOfLine][IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") + VarNames[VarNameNumber].Length]))) 
-                            && (IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") == 0) || !(char.IsLetter(TextFromFile[NumberOfLine][IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") - 1]))*/)
+                        if (IndexWithoutQuotesFromStart(TextFromFile[NumberOfLine], VarNames[VarNameNumber], "") != -1)// в строке находится переменная | variable in line                         
                         {
-                            Debug.Log(NumberOfLine);
                             while (IndexWithoutQuotesFromStart(buffer, VarNames[VarNameNumber], "") != -1)
                             {
                                 if (SpecialSymbol[FromLanguage] != "")
                                 {
-                                    buffer = TextFromFile[NumberOfLine].Substring(0, TextFromFile[NumberOfLine].IndexOf(VarNames[VarNameNumber]) - SpecialSymbol[FromLanguage].Length) + TextFromFile[NumberOfLine].Substring(TextFromFile[NumberOfLine].IndexOf(VarNames[VarNameNumber]));
+                                    buffer = TextFromFile[NumberOfLine].Substring(0, TextFromFile[NumberOfLine].IndexOf(VarNames[VarNameNumber]) - SpecialSymbol[FromLanguage].Length) + TextFromFile[NumberOfLine].Substring(TextFromFile[NumberOfLine].IndexOf(VarNames[VarNameNumber]));// замена специального символа | changing special symbol
                                 }
-                                Debug.Log("buff");
-                                Debug.Log(buffer);
                                 TextFromFile[NumberOfLine] = TextFromFile[NumberOfLine].Substring(0, (TextFromFile[NumberOfLine].Length - buffer.Length) + IndexWithoutQuotesFromStart(buffer, VarNames[VarNameNumber], VarNames[VarNameNumber])) + SpecialSymbol[OutputLanguage] + TextFromFile[NumberOfLine].Substring((TextFromFile[NumberOfLine].Length - buffer.Length) + IndexWithoutQuotesFromStart(buffer, VarNames[VarNameNumber], VarNames[VarNameNumber]));
                                 buffer = buffer.Substring(IndexWithoutQuotesFromStart(buffer, VarNames[VarNameNumber], "") + VarNames[VarNameNumber].Length);
-                                Debug.Log(buffer);
-                                Debug.Log("_______");
                             }
                         }
                     }
@@ -198,12 +186,13 @@ public class ButtonPressed : MonoBehaviour
 
     public List<string> ChangeEOL(List<string> TextFromFile, string FromLanguage, string OutputLanguage)
     {
-        List<string> BannedCollocationsFromLanguage = new List<string>();
+        List<string> BannedCollocationsFromLanguage = new List<string>();//словосочетания, после которых не ставится символ завершения строки | collocations that are not followed by a line-ending character
         List<string> BannedCollocationsOutputLanguage = new List<string>();
         string FileName = FromLanguage.ToLower() + "Rules.txt";
         string buffer = "";
         bool IsBannedCollocationOfInputLanguage = false;
         bool IsBannedCollocationOfOutputLanguage = false;
+        //заполняем запрещенные словосочетания для обоих языков | fill in the forbidden phrases for both languages
         foreach (string line in File.ReadAllLines(FileName))
         {
             BannedCollocationsFromLanguage.Add(line);
@@ -216,42 +205,49 @@ public class ButtonPressed : MonoBehaviour
         int MinimalIndex = -1;
         Dictionary<string, string> Comment = new Dictionary<string, string>
         { };
+        //заполняем однострочные комментарии | filling in one-line comments
         foreach (string line in File.ReadAllLines("Comment.txt"))
         {
             Comment.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> MultilineStartComment = new Dictionary<string, string>
         { };
+        //заполняем многострочные стартовые комментарии | filling in multi-line start comments
         foreach (string line in File.ReadAllLines("MultilineStartComment.txt"))
         {
             MultilineStartComment.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> MultilineEndComment = new Dictionary<string, string>
         { };
+        //заполняем многострочные конечные комментарии | filling in multi-line end comments
         foreach (string line in File.ReadAllLines("MultilineEndComment.txt"))
         {
             MultilineEndComment.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> EndOfLineSymbol = new Dictionary<string, string>
         { };
+        //заполняем символы завершения строки | filling in end of line characters
         foreach (string line in File.ReadLines("EndOfLineSymbol.txt"))
         {
             EndOfLineSymbol.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> StartBlocks = new Dictionary<string, string>()
         { };
+        //заполняем символы начала блока | fill in the characters of the beginning of the block
         foreach (string line in File.ReadLines("StartBlocks.txt"))
         {
             StartBlocks.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> EndBlocks = new Dictionary<string, string>()
         { };
+        //заполняем символы окончания блока | fill in the characters of the ending of the block
         foreach (string line in File.ReadLines("EndBlocks.txt"))
         {
             EndBlocks.Add(line.Substring(0, line.IndexOf(" ")), line.Substring(line.IndexOf(" ") + 1));
         }
         Dictionary<string, string> TabSymbol = new Dictionary<string, string>()
         { };
+        //заполняем символы табуляции | fill in the tab characters
         foreach (string line in File.ReadLines("TabSymbols.txt"))
         {
             TabSymbol.Add(line.Substring(0, line.IndexOf("___")), line.Substring(line.IndexOf("___") + 3));
@@ -260,6 +256,7 @@ public class ButtonPressed : MonoBehaviour
         {
             for (int LineNumber = 0; LineNumber < TextFromFile.Count; LineNumber++)
             {
+                //ищем тип первого комментария в строке | looking for the type of the first comment in the line
                 MinimalIndex = MinimalValue(IndexWithoutQuotesFromStart(TextFromFile[LineNumber], Comment[OutputLanguage], Comment[OutputLanguage]),
                                             IndexWithoutQuotesFromStart(TextFromFile[LineNumber], MultilineStartComment[OutputLanguage], MultilineStartComment[OutputLanguage]),
                                             IndexWithoutQuotesFromStart(TextFromFile[LineNumber], MultilineEndComment[OutputLanguage], MultilineEndComment[OutputLanguage]));
@@ -267,11 +264,13 @@ public class ButtonPressed : MonoBehaviour
                 {
                     for (int SymbolNumber = 0; SymbolNumber < TextFromFile[LineNumber].Length; SymbolNumber++)
                     {
+                        //копируем строку без пробелов и символов табуляции в buffer | copy the string without spaces and tabs to buffer
                         if (TextFromFile[LineNumber][SymbolNumber].ToString() != " " && TextFromFile[LineNumber][SymbolNumber].ToString() != TabSymbol[FromLanguage])
                         {
                             buffer += TextFromFile[LineNumber][SymbolNumber];
                         }
                     }
+                    //либо строка пустая, либо начинается с символа комментирования | either the string is empty, or it starts with a comment character
                     if (buffer == "" || IndexWithoutQuotesFromStart(buffer, Comment[OutputLanguage], Comment[OutputLanguage]) == 0 
                         || IndexWithoutQuotesFromStart(buffer, MultilineStartComment[OutputLanguage], Comment[OutputLanguage]) == 0 
                         || IndexWithoutQuotesFromStart(buffer, MultilineEndComment[OutputLanguage], Comment[OutputLanguage]) == 0)
@@ -283,7 +282,7 @@ public class ButtonPressed : MonoBehaviour
                     {
                         foreach (string CollocationOutputLanguage in BannedCollocationsOutputLanguage)
                         {
-                            if (TrueIndex(TextFromFile[LineNumber], CollocationOutputLanguage) != -1)
+                            if (TrueIndex(TextFromFile[LineNumber], CollocationOutputLanguage, MinimalIndex) != -1)
                             {
                                 IsBannedCollocationOfOutputLanguage = true;
                                 break;
@@ -292,7 +291,7 @@ public class ButtonPressed : MonoBehaviour
                     }
                     if (!IsBannedCollocationOfOutputLanguage)
                     {
-                        if (MinimalIndex == -1)
+                        if (MinimalIndex == -1)//строка не содержит комментариев | line does not contain comments
                         {
                             TextFromFile[LineNumber] = TextFromFile[LineNumber] + EndOfLineSymbol[OutputLanguage];
                         }
@@ -301,10 +300,10 @@ public class ButtonPressed : MonoBehaviour
                             TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, MinimalIndex) + EndOfLineSymbol[OutputLanguage] + TextFromFile[LineNumber].Substring(MinimalIndex + EndOfLineSymbol[OutputLanguage].Length - 1);
                         }
                     }
-                }
+                } 
                 else
                 {
-                    if (IndexWithoutQuotesFromStart(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], "") != -1)
+                    if (IndexWithoutQuotesFromStart(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], "") != -1)//в строке присутствует символ завершения строки | end of line character in line
                     {
                         for (int SymbolNumber = 0; SymbolNumber < TextFromFile[LineNumber].Length; SymbolNumber++)
                         {
@@ -324,7 +323,7 @@ public class ButtonPressed : MonoBehaviour
                         {
                             foreach (string CollocationInputLanguage in BannedCollocationsFromLanguage)
                             {
-                                if (TrueIndex(TextFromFile[LineNumber], CollocationInputLanguage) != -1)
+                                if (TrueIndex(TextFromFile[LineNumber], CollocationInputLanguage, MinimalIndex) != -1)
                                 {
                                     IsBannedCollocationOfInputLanguage = true;
                                     break;
@@ -332,7 +331,7 @@ public class ButtonPressed : MonoBehaviour
                             }
                             foreach (string CollocationOutputLanguage in BannedCollocationsOutputLanguage)
                             {
-                                if (TrueIndex(TextFromFile[LineNumber], CollocationOutputLanguage) != -1)
+                                if (TrueIndex(TextFromFile[LineNumber], CollocationOutputLanguage, MinimalIndex) != -1)
                                 {
                                     IsBannedCollocationOfOutputLanguage = true;
                                     break;
@@ -343,7 +342,7 @@ public class ButtonPressed : MonoBehaviour
                         {
                             if (!IsBannedCollocationOfOutputLanguage)
                             {
-                                if (MinimalIndex == -1)
+                                if (MinimalIndex == -1)//в строке нет символов комментирования | no comments characters in line
                                 {
                                     TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, TextFromFile[LineNumber].Length - EndOfLineSymbol[FromLanguage].Length) + EndOfLineSymbol[OutputLanguage];
                                 }
@@ -392,9 +391,9 @@ public class ButtonPressed : MonoBehaviour
         SuccessText.gameObject.SetActive(false);
     }
 
-    //метод, ищущий индекс подстроки в зависимости от идущего далее элемента
+    //метод, проверяющий наличие слова, после которого в строке не ставится символ завершения строки | method that checks for a word that is not followed by a line ending character
 
-    public int TrueIndex(string where, string what)
+    public int TrueIndex(string where, string what, int commentIndex = -1)
     {
         int index = -1;
         if (where.IndexOf(what) != -1)
@@ -409,6 +408,10 @@ public class ButtonPressed : MonoBehaviour
                 index = -1;
                 where.Substring(index + what.Length);
             }
+        }
+        if(commentIndex != -1 && index > commentIndex)
+        {
+            index = -1;
         }
         return index;
     }

@@ -25,8 +25,6 @@ namespace VariableFinder
         public List<string> FinderPYTHON(List<string> TextFromFile)
         {
             List<string> VariableNames = new List<string>();
-            VariableNames.Add("abc");
-            VariableNames.Add("klmn");
             //код заполняющий VariableNames именами переменных на языке python
             //code that fills Variable Names with variable names in python
             return VariableNames;
@@ -35,10 +33,8 @@ namespace VariableFinder
         public List<string> FinderCSHARP(List<string> TextFromFile)
         {
             List<string> VariableNames = new List<string>();
-            VariableNames.Add("abc");
-            VariableNames.Add("klmn");
             //код заполняющий VariableNames именами переменных на языке c#
-            //code that fills Variable Names with variable names in python
+            //code that fills Variable Names with variable names in c#
             return VariableNames;
         }
         
