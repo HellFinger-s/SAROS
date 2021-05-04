@@ -655,6 +655,9 @@ public class ButtonPressed : MonoBehaviour
         return index;
     }
 
+    //метод, который ищет позицию символа завершения строки
+    //method that searches for the position of the line-ending character
+
     public int IndexOfEOL(string where, string what, string oneLineComment, string multiLineStartComment, string multiLineEndComment, bool isOpen)
     {
         Debug.Log(isOpen);
