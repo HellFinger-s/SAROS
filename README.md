@@ -15,6 +15,11 @@ they will use in the work.
 * Replace the comment characters (single-line and multi-line). The program similarly takes into account quotation marks and does not touch the characters inside them.
 * Replace the block split symbols. This operation was not fully implemented by me.
 ### **Example of work**
+Initial file, C# language:
+![C#](inCS.png)
+</br>
+After running the program, with the target Python language:
+![Python](inPython.png)
 
 # Система авоматизации рутинных операций при переводе кода с одного языка программирования (далее ЯП) на другой
 ### **Описание**
@@ -33,3 +38,8 @@ they will use in the work.
   * Замена символов комментирования (одно и многострочных). Программа аналогично учитывает кавычки и не трогает символы, находящиеся внутри них.
   * Замена символов разделения блоков. Данная операция не была мною реализована до конца.
 ### **Пример работы программы**
+Начальный файл, язык C#:
+![C#](inCS.png)
+</br>
+После работы программы, с целевым языком Python:
+![Python](inPython.png)
