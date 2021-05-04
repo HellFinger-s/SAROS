@@ -34,6 +34,7 @@ public class ButtonPressed : MonoBehaviour
             TextFromFile = ChangeEOL(TextFromFile, FromLanguage, OutputLanguage);
             VariableNames = FinderObject.MainFind(TextFromFile, FromLanguage);//ищем имена переменных | find variable names
             TextFromFile = SpecialSymbolsChanger(VariableNames, TextFromFile, FromLanguage, OutputLanguage);//checked
+            Debug.Log(1);
             WriteToFile(TextFromFile, OutputPath);//checked
             SuccessText.gameObject.SetActive(true);
             SuccessText.text = "Готово " + (Number+1).ToString() + "/" + StartDirectories.Count.ToString();
@@ -104,7 +105,6 @@ public class ButtonPressed : MonoBehaviour
         }
         File.WriteAllLines(OutputPath, WriteToFile);
     }
-
 
     //метод, заменяющий комментарии и записывающий строки из файла в коллекцию
     //method that read text to collection and change comment symbols
@@ -192,6 +192,9 @@ public class ButtonPressed : MonoBehaviour
         string buffer = "";
         bool IsBannedCollocationOfInputLanguage = false;
         bool IsBannedCollocationOfOutputLanguage = false;
+        int MultilineStartCommentIndex = -1;
+        int MultilineEndCommentIndex = -1;
+        bool isOpen = false;
         //заполняем запрещенные словосочетания для обоих языков | fill in the forbidden phrases for both languages
         foreach (string line in File.ReadAllLines(FileName))
         {
@@ -303,8 +306,16 @@ public class ButtonPressed : MonoBehaviour
                 } 
                 else
                 {
-                    if (IndexWithoutQuotesFromStart(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], "") != -1)//в строке присутствует символ завершения строки | end of line character in line
+                    if (IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen) != -1)//в строке присутствует символ завершения строки | end of line character in line
                     {
+                        if(IndexWithoutQuotesFromStart(TextFromFile[LineNumber], MultilineStartComment[OutputLanguage], Comment[OutputLanguage]) != -1 && !isOpen)
+                        {
+                            isOpen = true;
+                        }
+                        if (IndexWithoutQuotesFromStart(TextFromFile[LineNumber], MultilineEndComment[OutputLanguage], Comment[OutputLanguage]) != -1 && isOpen)
+                        {
+                            isOpen = false;
+                        }
                         for (int SymbolNumber = 0; SymbolNumber < TextFromFile[LineNumber].Length; SymbolNumber++)
                         {
                             if (TextFromFile[LineNumber][SymbolNumber].ToString() != " " && TextFromFile[LineNumber][SymbolNumber].ToString() != TabSymbol[FromLanguage])
@@ -356,17 +367,17 @@ public class ButtonPressed : MonoBehaviour
                         {
                             if (IsBannedCollocationOfOutputLanguage)
                             {
-                                TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexWithoutQuotesFromEnd(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], EndOfLineSymbol[FromLanguage])) + TextFromFile[LineNumber].Substring(TextFromFile[LineNumber].LastIndexOf(EndOfLineSymbol[FromLanguage]) + EndOfLineSymbol[FromLanguage].Length);
+                                TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen)) + TextFromFile[LineNumber].Substring(IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen) + EndOfLineSymbol[FromLanguage].Length);
                             }
                             else
                             {
-                                if (TextFromFile[LineNumber].LastIndexOf(EndOfLineSymbol[FromLanguage]) + EndOfLineSymbol[OutputLanguage].Length + 1 == TextFromFile[LineNumber].Length)
+                                if (IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen) + EndOfLineSymbol[OutputLanguage].Length + 1 == TextFromFile[LineNumber].Length)
                                 {
-                                    TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexWithoutQuotesFromEnd(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], EndOfLineSymbol[FromLanguage])) + EndOfLineSymbol[OutputLanguage] + TextFromFile[LineNumber].Substring(IndexWithoutQuotesFromEnd(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], EndOfLineSymbol[FromLanguage]) + EndOfLineSymbol[OutputLanguage].Length + 1);
+                                    TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen)) + EndOfLineSymbol[OutputLanguage] + TextFromFile[LineNumber].Substring(IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen) + EndOfLineSymbol[OutputLanguage].Length + 1);
                                 }
                                 else
                                 {
-                                    TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexWithoutQuotesFromEnd(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], EndOfLineSymbol[FromLanguage])) + EndOfLineSymbol[OutputLanguage] + TextFromFile[LineNumber].Substring(IndexWithoutQuotesFromEnd(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], EndOfLineSymbol[FromLanguage]) + EndOfLineSymbol[FromLanguage].Length);
+                                    TextFromFile[LineNumber] = TextFromFile[LineNumber].Substring(0, IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen)) + EndOfLineSymbol[OutputLanguage] + TextFromFile[LineNumber].Substring(IndexOfEOL(TextFromFile[LineNumber], EndOfLineSymbol[FromLanguage], Comment[OutputLanguage], MultilineStartComment[OutputLanguage], MultilineEndComment[OutputLanguage], isOpen) + EndOfLineSymbol[FromLanguage].Length);
                                 }
                             }
                         }
@@ -638,6 +649,41 @@ public class ButtonPressed : MonoBehaviour
                             }
                         }
                     }
+                }
+            }
+        }
+        return index;
+    }
+
+    public int IndexOfEOL(string where, string what, string oneLineComment, string multiLineStartComment, string multiLineEndComment, bool isOpen)
+    {
+        Debug.Log(isOpen);
+        int index = -1;
+        string buffer = "";
+        if (isOpen)
+        {
+            index = MinimalValue(IndexWithoutQuotesFromStart(where, multiLineStartComment, oneLineComment), IndexWithoutQuotesFromStart(where, oneLineComment, oneLineComment), -1);
+        }
+        else
+        {
+            if(IndexWithoutQuotesFromStart(where, multiLineEndComment, oneLineComment) != -1)
+            {
+                buffer = buffer.Substring(IndexWithoutQuotesFromStart(where, multiLineEndComment, oneLineComment));
+                Debug.Log(buffer);
+                index = where.Length - buffer.Length;
+                if (buffer.Length != 0)
+                {
+                    if (IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment) != -1)
+                    {
+                        index += IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment);
+                    }
+                }
+            }
+            else
+            {
+                if (IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment) != -1)
+                {
+                    index = IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment);
                 }
             }
         }
