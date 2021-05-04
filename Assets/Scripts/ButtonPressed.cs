@@ -30,12 +30,11 @@ public class ButtonPressed : MonoBehaviour
             string OutputLanguage = OutputLanguages[Number].text.ToLower();
             string InputPath = StartDirectories[Number].text;
             string OutputPath = EndDirectories[Number].text;
-            TextFromFile = CommentChangerAndReader(InputPath, FromLanguage, OutputLanguage, SuccessText);//checked
+            TextFromFile = CommentChangerAndReader(InputPath, FromLanguage, OutputLanguage, SuccessText);
             TextFromFile = ChangeEOL(TextFromFile, FromLanguage, OutputLanguage);
             VariableNames = FinderObject.MainFind(TextFromFile, FromLanguage);//ищем имена переменных | find variable names
-            TextFromFile = SpecialSymbolsChanger(VariableNames, TextFromFile, FromLanguage, OutputLanguage);//checked
-            Debug.Log(1);
-            WriteToFile(TextFromFile, OutputPath);//checked
+            TextFromFile = SpecialSymbolsChanger(VariableNames, TextFromFile, FromLanguage, OutputLanguage);
+            WriteToFile(TextFromFile, OutputPath);
             SuccessText.gameObject.SetActive(true);
             SuccessText.text = "Готово " + (Number+1).ToString() + "/" + StartDirectories.Count.ToString();
 
@@ -192,8 +191,6 @@ public class ButtonPressed : MonoBehaviour
         string buffer = "";
         bool IsBannedCollocationOfInputLanguage = false;
         bool IsBannedCollocationOfOutputLanguage = false;
-        int MultilineStartCommentIndex = -1;
-        int MultilineEndCommentIndex = -1;
         bool isOpen = false;
         //заполняем запрещенные словосочетания для обоих языков | fill in the forbidden phrases for both languages
         foreach (string line in File.ReadAllLines(FileName))
@@ -660,7 +657,6 @@ public class ButtonPressed : MonoBehaviour
 
     public int IndexOfEOL(string where, string what, string oneLineComment, string multiLineStartComment, string multiLineEndComment, bool isOpen)
     {
-        Debug.Log(isOpen);
         int index = -1;
         string buffer = "";
         if (isOpen)
@@ -672,7 +668,6 @@ public class ButtonPressed : MonoBehaviour
             if(IndexWithoutQuotesFromStart(where, multiLineEndComment, oneLineComment) != -1)
             {
                 buffer = buffer.Substring(IndexWithoutQuotesFromStart(where, multiLineEndComment, oneLineComment));
-                Debug.Log(buffer);
                 index = where.Length - buffer.Length;
                 if (buffer.Length != 0)
                 {
@@ -684,9 +679,14 @@ public class ButtonPressed : MonoBehaviour
             }
             else
             {
-                if (IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment) != -1)
+                if (IndexWithoutQuotesFromStart(where, oneLineComment, oneLineComment) != -1)
                 {
-                    index = IndexWithoutQuotesFromStart(buffer, oneLineComment, oneLineComment);
+
+                    index = IndexWithoutQuotesFromStart(where, oneLineComment, oneLineComment) - 1;
+                }
+                else
+                {
+                    index = where.Length - 1;
                 }
             }
         }
