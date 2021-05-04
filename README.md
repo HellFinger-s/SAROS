@@ -13,7 +13,8 @@ they will use in the work.
   will be converted to< / br>
   Python : ` ' a = ";"#text;` ' </br>
 * Replace the comment characters (single-line and multi-line). The program similarly takes into account quotation marks and does not touch the characters inside them.
-* Replace the block split symbols. This operation was not performed by me.
+* Replace the block split symbols. This operation was not fully implemented by me.
+### **Example of work**
 
 # Система авоматизации рутинных операций при переводе кода с одного языка программирования (далее ЯП) на другой
 ### **Описание**
@@ -30,4 +31,5 @@ they will use in the work.
   будет преобразована в</br>
   Python : ```a = ";"#text;```</br>
   * Замена символов комментирования (одно и многострочных). Программа аналогично учитывает кавычки и не трогает символы, находящиеся внутри них.
-  * Замена символов разделения блоков. Данная операция не была мною реализована.
+  * Замена символов разделения блоков. Данная операция не была мною реализована до конца.
+### **Пример работы программы**
