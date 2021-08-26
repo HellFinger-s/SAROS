@@ -5,13 +5,13 @@ This project was developed during the Olympiad "Step into the Future", held by t
 they will use in the work. 
 * Replace the end-of-line characters. The program takes into account the features of various programming languages (after which words in the line the line ending character is not used), but it works
   at the moment, the string by type is not ideal either:</br>
-  PHP : ` 'if ($number < 0) echo 'negative';` ' </br>
+  PHP : ` 'if ($number < 0) echo 'negative';`  </br>
   will only be converted to</br>
-  Python : ` ' if (number < 0) echo 'negative';` ' </br>
+  Python : ` ' if (number < 0) echo 'negative';`  </br>
   The alogrithm takes into account the presence of quotation marks (it will not replace the end-of-line characters inside them) and comments (it will not replace the end-of-line characters after them). So, the line is as follows:</br>
   C# : ` ' a =";"; / / text;` </br>
-  will be converted to< / br>
-  Python : ` ' a = ";"#text;` ' </br>
+  will be converted to</br>
+  Python : ` ' a = ";"#text;` </br>
 * Replace the comment characters (single-line and multi-line). The program similarly takes into account quotation marks and does not touch the characters inside them.
 * Replace the block split symbols. This operation was not fully implemented by me.
 ### **Example of work**
